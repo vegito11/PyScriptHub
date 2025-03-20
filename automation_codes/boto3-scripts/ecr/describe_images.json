@@ -1,0 +1,48 @@
+{
+    "imageDetails": [
+      {
+        "registryId": "696785326594",
+        "repositoryName": "myrepo/shopcart-commons",
+        "imageDigest": "sha256:974a81f2d31b303bfa01bae7a2a1cb0abed51ff5ede26023408b3fbe74bd1fc2",
+        "imageTags": [
+          "alpine_2021.2.0_12"
+        ],
+        "imageSizeInBytes": 996573576,
+        "imagePushedAt": "2021-12-15 13:59:29+05:30",
+        "imageManifestMediaType": "application/vnd.docker.distribution.manifest.v2+json",
+        "artifactMediaType": "application/vnd.docker.container.image.v1+json"
+      },
+      {
+        "registryId": "696785326594",
+        "repositoryName": "myrepo/shopcart-commons",
+        "imageDigest": "sha256:5e37437263a9e52577bc1cdae8d12f61333544b126deb97ebe1ccdaf3e48d2e3",
+        "imageTags": [
+          "alpine_2021.2.0_13"
+        ],
+        "imageSizeInBytes": 986646088,
+        "imagePushedAt": "2021-12-14 19:33:01+05:30",
+        "imageManifestMediaType": "application/vnd.docker.distribution.manifest.v2+json",
+        "artifactMediaType": "application/vnd.docker.container.image.v1+json"
+      },
+      {
+        "registryId": "696785326594",
+        "repositoryName": "myrepo/shopcart-commons",
+        "imageDigest": "sha256:19820be939fc52c29c986aea23c3fc2065365098c96d2a97db7de5633a0aab97",
+        "imageSizeInBytes": 996573396,
+        "imagePushedAt": "2021-12-14 16:01:06+05:30",
+        "imageManifestMediaType": "application/vnd.docker.distribution.manifest.v2+json",
+        "artifactMediaType": "application/vnd.docker.container.image.v1+json"
+      }
+    ],
+    "ResponseMetadata": {
+      "RequestId": "4a57c552-aa8f-4648-af80-36dd783b0b85",
+      "HTTPStatusCode": 200,
+      "HTTPHeaders": {
+        "x-amzn-requestid": "4a57c552-aa8f-4648-af80-36dd783b0b85",
+        "date": "Wed, 15 Dec 2021 12:43:21 GMT",
+        "content-type": "application/x-amz-json-1.1",
+        "content-length": "1225"
+      },
+      "RetryAttempts": 0
+    }
+  }
