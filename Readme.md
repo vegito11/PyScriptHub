@@ -13,6 +13,12 @@ This repository contains a collection of Python scripts for various tasks, inclu
 
         </details>
     
+    - **Compute, EKS**
+
+        - [Start and Stop Vms](./automation_codes/boto3-scripts/ec2/stop_instance.py)
+
+        - [Update EKS Nodegroup](./automation_codes/boto3-scripts/eks/upgrade_nodegroup.py)
+    
     -  **IAM, Secret Manager, Pricing**
 
         - [Delete Inactive users](./automation_codes/boto3-scripts/iam/inactive-users/delete_inactive_users.py)
@@ -61,6 +67,25 @@ This repository contains a collection of Python scripts for various tasks, inclu
     
     2. [ActiveMq Producer](./automation_codes/databases/amq_producer.py)
 
-- [Jenkins](./automation_codes/jenkins)
+    2. [Milvus snapshot backup and restore](./automation_codes/databases/milvus-snapshot.py)
 
-- [Github](./automation_codes/Github)
+- [Jenkins](./automation_codes/jenkins/)
+
+    - [Jenkins connection](automation_codes/jenkins/jenkins_util.py)
+
+    - [create jenkins job](./automation_codes/jenkins/jenkin/jobs.py)
+    
+    - [Get Job,Node,Cred Permissions](./automation_codes/jenkins/jenkin/permissions.py)
+    
+    - [Create, Delete, Map, Remove Role, User Class](./automation_codes/jenkins/jenkin/roles.py)
+    
+    - [Create, Delete, Map, Remove Role, User](./automation_codes/jenkins/jenkin/rbac.py)
+    
+
+- [Github](./automation_codes/github/)
+    
+    - [Create, Delete branches, set protection rule](./automation_codes/github/crud_branches.py)
+    
+    - [CRUD webhook](./automation_codes/github/webhook_crud.py)
+
+- [Get Transcript from video](./automation_codes/gcp/get_transcribe.py)

@@ -1,0 +1,96 @@
+{
+	"jenkins": {
+		"url": "http://11.12.13.14:8080/",
+		"ip": "11.12.13.14",
+		"username": "admin",
+		"password": "XXXXXXXXXX"
+	},
+	"github": {
+		"webhook_token": "ghp_XXXXXXXXXX",
+		"trigger_token": "XXXXx",
+		"orgname": "Shopkart",
+		"code_repo_name": [
+			"sample_app",
+			"core-service"
+		]
+	},
+	"jenkins_jobs": {
+		"jobconfig": {
+			"github_token_id" : "github_token",
+			"gitowner" : "Shopkart",
+			"trigger_token": "XXXXx",
+			"branch_filter": "main|dev.*|v[0-9]+\\.[0-9]+\\.[0-9]+|PR-[0-9]+",
+			"template": "multibranch_job.xml"
+		},
+		"sample_app": {
+			"description": "CI job for sample_app",
+			"reponame": "sample_app"
+		},
+		"core-service": {
+			"description": "CI job for core-service which will create image with name core-services ",
+			"reponame": "core-service"
+		},
+		"deployment":{
+			"name": "K8S-App-Deployment",
+			"description": "Job to deploy application K8S Cluster",
+			"template": "k8s-deployment.xml"
+		},
+		"test":{
+			"name": "test-K8S-App-Deployment",
+			"description": "Job to deploy application K8S Cluster",
+			"template": "k8s-deployment.xml"
+		}
+	},
+	"teams": {
+		"dev": {
+			"users": {
+				"mohit.modi": {
+					"email": "mohit@shopkar.io",
+					"username": "rohit_modi"
+				},		
+				"rahul.shah" : {
+					"email": "rahul@shopkar.io",
+					"username": "rahul_shah"
+				},
+				"rohit.dhoni" : {
+					"email": "rohit@shopkar.io",
+					"username": "rohit_dhoni"
+				}
+			},
+			"rolename": "dev-role",
+			"pattern": "([A-Za-z0-9\\-_]*-ci|[A-Za-z0-9\\-_]*Deployment*)"
+		},
+		"frontend": {
+			"users": {
+				"rushikesh.shirkar" : {
+					"email": "john_doe@shopkar.io",
+					"username": "john_doe"
+				}
+			},
+			"rolename": "dev-role",
+			"pattern": "([A-Za-z0-9\\-_]*-ci|[A-Za-z0-9\\-_]*Deployment*)"
+
+		},
+		"qa": {
+			"users": {
+				"arun.pal" : {
+					"email": "sachin_sharma@shopkar.io",
+					"username": "sachin_sharma"
+				}
+			},
+			"rolename": "qa-role",
+			"pattern": "([A-Za-z0-9\\-]*-ci|[A-Za-z0-9\\-_]*Deployment*)"
+		},
+		"devops": {
+			"users": {
+				"omkar.bhujbal" : {
+					"email": "omkar@shopkar.io",
+					"username": "omkar_messi"
+				}
+			},
+			"rolename": "devops-role",
+			"pattern": ["*"]
+		}
+	}
+
+}

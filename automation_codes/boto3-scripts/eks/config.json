@@ -1,0 +1,20 @@
+{
+	"clusters": {
+		"test": {
+			"desired_config":{
+	            "minSize": 2,
+	            "maxSize": 4,
+	            "desiredSize": 3
+        	},
+        	"ng_name": "test-eks-node-2-123456789978655"
+		},
+		"temp": {
+			"desired_config":{
+	            "minSize": 2,
+	            "maxSize": 4,
+	            "desiredSize": 3
+        	},
+        	"ng_name": "temp-eks-node-2-20221004150106751900000001"
+		}
+	}
+}

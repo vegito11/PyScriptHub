@@ -1,0 +1,264 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1232.v5a_4c994312f1">
+  <actions/>
+  <description>{{ job.description | default('deploy apps on k8s cluster')}} </description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>7</daysToKeep>
+        <numToKeep>15</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.6.4">
+          <name>APP_NAMES</name>
+          <description>Select which application to deploy on respective cluster</description>
+          <randomName>choice-parameter-1771264975722</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1183.v774b_0b_0a_a_451">
+              <script>return [
+  &quot;core-service&quot;,
+  &quot;document-service&quot;,
+   &quot;auth-service&quot;,
+   &quot;shopkart-dashboard&quot;
+]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1183.v774b_0b_0a_a_451">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>{{ job.name | default('K8S-Deploment')}}</projectName>
+          <projectFullName>{{ job.name | default('K8S-Deploment')}}</projectFullName>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>false</filterable>
+          <filterLength>2</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>ENVIRONMENT_TYPE</name>
+          <description>chose cluster on which we have to deploy the application</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>development</string>
+              <string>staging</string>
+              <string>production</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>IMAGE_TAG</name>
+          <description>tag of image to be deployed</description>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>HELM_CHART_VERSION</name>
+          <description>if not provided it will be evaluated from IMAGE TAG</description>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DRY_RUN</name>
+          <description>If we just want to test pipeline without actually deploying on cluster use it </description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>PRODUCTION_TOKEN</name>
+          <description>!! Give only when deploying on production</description>
+          <defaultValue>{XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX9HnF3o=}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2759.v87459c4eea_ca_">
+    <script>@NonCPS
+def getBuildUser() {
+    try {
+        return currentBuild.rawBuild.getCause(Cause.UserIdCause).getUserId()
+    }
+    catch(Exception e) {
+      return &quot;UNKNOWN&quot;
+    }
+}
+
+def set_common_variables(){
+  env.RELEASE_VER   = &quot;0.1.0&quot;
+  env.CFG_REPO      = &quot;application-deployment-charts&quot;
+  env.CFG_BRNCH     = &quot;main&quot;
+  env.GIT_URL       = &quot;git@github.com:shopkartDev&quot;
+  env.CHART_BUCKET  = &quot;charts.shopkart.io&quot;
+  env.ECR_REPO      = &quot;959986003692.dkr.ecr.ap-south-1.amazonaws.com&quot;
+  env.AWS_REGION    = &quot;ap-south-1&quot;
+  env.BUILD_USER    = getBuildUser()
+}
+
+def set_variables(){
+  app_info = [
+    &quot;sample_app&quot; : [
+      &quot;active&quot;: false,
+      &quot;chart_name&quot;: &quot;core-service&quot;,
+    ],
+    &quot;core-service&quot; : [
+      &quot;active&quot;: true,
+      &quot;chart_name&quot;: &quot;core-service&quot;,
+    ],
+    &quot;test-dashboard&quot; : [
+      &quot;active&quot;: true,
+      &quot;chart_name&quot;: &quot;shopkart-dashboard&quot;,
+    ],
+    &quot;auth-service&quot; : [
+      &quot;active&quot;: true,
+      &quot;chart_name&quot;: &quot;auth-service&quot;,
+    ],
+    &quot;default&quot; : [
+      &quot;active&quot;: false,
+      &quot;chart_name&quot;: &quot;default&quot;,
+    ],
+  ]
+
+  env_var_map = [
+    &quot;development&quot; : [
+      &quot;name&quot;: &quot;development&quot;
+    ],
+
+    &quot;staging&quot; : [
+      &quot;name&quot;: &quot;staging&quot;
+    ],
+
+    &quot;production&quot; : [
+      &quot;name&quot;: &quot;production&quot;
+    ],
+  ]
+
+  /* Process the paramater passed by users */
+  if (IMAGE_TAG == &quot;&quot;) {
+    currentBuild.result = &quot;UNSTABLE&quot;
+    throw new Exception(&quot;Please provide Image Tag &quot;)
+  }
+  if (HELM_CHART_VERSION == &quot;&quot;){
+    println(&quot;Evaluation HELM_CHART_VERSION from IMAGE_TAG&quot;)
+    env.HELM_CHART_VERSION = &quot;${RELEASE_VER}-${IMAGE_TAG}&quot;
+  }
+}
+
+def get_charts(CHART_NAME, CHART_VERSION){
+  sh&quot;&quot;&quot;
+    # export AWS_REGION=${AWS_REGION}
+    mkdir -p charts &amp;&amp; cd charts
+    helm repo add kart_repo s3://${CHART_BUCKET}/charts
+    helm pull kart_repo/${CHART_NAME} --version ${CHART_VERSION}
+    tar -xvf ${CHART_NAME}-${CHART_VERSION}.tgz
+    rm ${CHART_NAME}-${CHART_VERSION}.tgz
+  &quot;&quot;&quot;
+}
+
+def deploy_app(CHART_NAME){
+
+  chart_path=&quot;charts/${CHART_NAME}&quot;
+  values_files = &quot;&quot;
+
+  if (fileExists (&quot;${chart_path}/values.${ENVIRONMENT_TYPE}.yaml&quot;)){
+      values_files += &quot; --values values.${ENVIRONMENT_TYPE}.yaml &quot;
+  }
+  if (fileExists (&quot;${chart_path}/secrets.${ENVIRONMENT_TYPE}.yaml&quot;)){
+      values_files += &quot; --values secrets.${ENVIRONMENT_TYPE}.yaml &quot;
+  }
+
+  RELEASE_NAME = CHART_NAME.replaceAll(&quot;_&quot;,&quot;-&quot;)
+
+  if(ENVIRONMENT_TYPE == &quot;production&quot;){
+    withCredentials([string(credentialsId: &apos;production_password&apos;, variable: &apos;PROD_TOKEN&apos;)]) {
+      if (PROD_TOKEN != PRODUCTION_TOKEN){
+        throw new Exception(&quot;Invalid Production Token , Please contact admin &quot;)
+      }
+    }
+  }
+
+  sh&quot;&quot;&quot;
+    cd ${chart_path}
+
+    aws eks update-kubeconfig --region ${AWS_REGION} --name ${ENVIRONMENT_TYPE}
+    helm secrets upgrade --install ${RELEASE_NAME}  ${values_files} --set image.tag=&quot;${IMAGE_TAG}&quot; --set image.pullPolicy=&quot;Always&quot;  --namespace ${ENVIRONMENT_TYPE} .
+    set +x
+    #helm template ${RELEASE_NAME} ${values_files}  --namespace ${ENVIRONMENT_TYPE}  .
+    set -x
+
+  &quot;&quot;&quot;
+}
+
+def parseChoice(){
+
+  for(app_name in APP_NAMES.split(&quot;,&quot;)) {
+
+    active = app_info.get(app_name, app_info[&quot;default&quot;])[&quot;active&quot;]
+    chart_name = app_info.get(app_name).get(&quot;chart_name&quot;, app_name)
+    env.APP_NAME = app_name
+
+    if(app_name &amp;&amp; active){
+      get_charts(chart_name, HELM_CHART_VERSION)
+      deploy_app(chart_name)
+      send_deploy_notification(app_name)
+    }
+    else{
+      println(&quot; Given application - ${app_name} - is not active ${active} &quot;)
+    }
+  }
+}
+
+def send_deploy_notification(app_name){
+
+  switch(currentBuild.currentResult) {
+    case &quot;SUCCESS&quot;:
+      DEPLOY_STATUS = &quot;SUCCESS ✅&quot;
+      SLACK_COLOR = &quot;#00E676&quot;
+      msg = &quot;Successfully deployed application ${app_name} on `${ENVIRONMENT_TYPE}` with tag `${IMAGE_TAG}`&quot;
+      break
+    default:
+      DEPLOY_STATUS = &quot;Failed 🟠&quot;
+      SLACK_COLOR = &quot;#EF6C00&quot;
+      msg = &quot;failed to deployment application ${app_name} on `${ENVIRONMENT_TYPE}` with tag `${IMAGE_TAG}`&quot;
+  }
+
+  slack_msg = &quot;&quot;&quot; *${app_name} deployment ${DEPLOY_STATUS} *
+  *BUILD_USER* : `${env.BUILD_USER}`
+  *BUILD_URL*  : `${BUILD_URL}`
+  *MSG* : *${msg}*
+  &quot;&quot;&quot;
+
+  SLACK_CHANNEL_NAME=&quot;#build-status&quot;
+
+  slackSend(channel: SLACK_CHANNEL_NAME, color: SLACK_COLOR, message: slack_msg)
+}
+
+node(&quot;cd_nodes&quot;) {
+
+  cleanWs()
+  set_common_variables()
+  set_variables()
+
+  try {
+    parseChoice()
+    cleanWs()
+  }
+  catch (e) {
+    currentBuild.result = &quot;FAILED&quot;
+    send_deploy_notification(APP_NAME)
+    throw e
+  }
+  finally{
+
+  }
+}</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
