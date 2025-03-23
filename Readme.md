@@ -4,7 +4,7 @@ This repository contains a collection of Python scripts for various tasks, inclu
 
 ## Table of Contents
 
-- [AWS Automation (Boto3)](#aws-automation-boto3)
+- [AWS Automation (Boto3)](automation_codes/boto3-scripts/)
 
     -  <details>
         <summary> <b> VPC,Security Group, Networking etc </b> </summary>
@@ -28,6 +28,8 @@ This repository contains a collection of Python scripts for various tasks, inclu
         - [Rotate User Keys](automation_codes/boto3-scripts/iam/inactive-users/rotate_keys.py)
 
         - [Add Cognito User](automation_codes/boto3-scripts/cognito/adduser.py)
+
+        - [Configuring AWS profile creadenials with MFA](bash_scripts/aws/mfa_cli.sh)
     
     - **Cloudfront**
 
@@ -42,6 +44,17 @@ This repository contains a collection of Python scripts for various tasks, inclu
     - **ECR**
 
         - [Remove Unused Images](automation_codes/boto3-scripts/ecr/remove_unused_images.py)
+
+
+- [Azure](./automation_codes/azure)
+
+    - [Get logged azure user](./automation_codes/azure/get-auth-user.py)
+
+    - [List azure vms](./automation_codes/azure/azure_services/list-azure-vms.py)
+    
+    - [Get and Set KeyVault secret](./automation_codes/azure/azure_services/get-set-secret.py)
+    
+    - [Azure Blob storage operations](./automation_codes/azure/azure_services/retrive-upload-files.py)
 
 - [GitLab API Scripts](#gitlab-api-scripts)
 
