@@ -31,11 +31,13 @@ This repository contains a collection of Python scripts for various tasks, inclu
 
         - [Configuring AWS profile creadenials with MFA](bash_scripts/aws/mfa_cli.sh)
     
-    - **Cloudfront**
+    - **Cloudfront, S3**
 
         - [Update Distros](./automation_codes/boto3-scripts/cloudfront/update_ditros.py)
 
         - [Get Signed URL for S3](./automation_codes/boto3-scripts/cloudfront/signed-url.py)
+
+        - [Push Large file to s3 bucket - Multipart-upload](./automation_codes/boto3-scripts/s3/multipart-upload.py)
 
     - **Dynamodb**
         
